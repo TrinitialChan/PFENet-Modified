@@ -112,7 +112,7 @@ class Logger:
 
     @classmethod
     def save_model_miou(cls, model, epoch, val_miou):
-        torch.save(model.state_dict(), os.path.join(cls.logpath, f'best_model_from_epoch_{epoch}.pt'))
+        torch.save(model.state_dict(), os.path.join(cls.logpath, f'best_model.pt'))
         cls.info('Model saved @%d w/ val. mIoU: %5.2f.\n' % (epoch, val_miou))
 
     @classmethod
