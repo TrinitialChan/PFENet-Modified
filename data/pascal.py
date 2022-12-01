@@ -120,7 +120,7 @@ class DatasetPASCAL(Dataset):
     def build_img_metadata(self):
 
         def read_metadata(split, fold_id):
-            fold_n_metadata = os.path.join('data/splits/pascal/%s/fold%d.txt' % (split, fold_id))
+            fold_n_metadata = os.path.join('/kaggle/working/PFENet-Modified/data/splits/pascal/%s/fold%d.txt' % (split, fold_id))
             with open(fold_n_metadata, 'r') as f:
                 fold_n_metadata = f.read().split('\n')[:-1]
             fold_n_metadata = [[data.split('__')[0], int(data.split('__')[1]) - 1] for data in fold_n_metadata]
@@ -129,7 +129,7 @@ class DatasetPASCAL(Dataset):
         # 跳过含有新类的图片
         def read_metadata_skip_novel(split, fold_id):
             novelclass_list = list(range(1+self.fold*5,1+self.fold*5+5))
-            fold_n_metadata = os.path.join('data/splits/pascal/%s/fold%d.txt' % (split, fold_id))
+            fold_n_metadata = os.path.join('/kaggle/working/PFENet-Modified/data/splits/pascal/%s/fold%d.txt' % (split, fold_id))
             with open(fold_n_metadata, 'r') as f:
                 fold_n_metadata = f.read().split('\n')[:-1]
             fold_n_metadata = [[data.split('__')[0], int(data.split('__')[1]) - 1] for data in fold_n_metadata]
