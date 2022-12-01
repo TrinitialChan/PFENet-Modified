@@ -3,5 +3,5 @@ __pycache__/
 *.ipynb
 *DS_Store
 logs
-initmodel
+initmodel/
 .ipynb_checkpoints
