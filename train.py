@@ -54,7 +54,9 @@ if __name__ == '__main__':
 
     # Arguments parsing
     parser = argparse.ArgumentParser(description='Hypercorrelation Squeeze Pytorch Implementation')
-    parser.add_argument('--datapath', type=str, default='/home/user4/datasets/VOCdevkit')
+    parser.add_argument('--data_img_path', type=str, default='/home/user4/datasets/VOCdevkit/JPEGImages/')
+    parser.add_argument('--data_ann_path', type=str, default='/home/user4/datasets/VOCdevkit/SegmentationClassAug/')
+    parser.add_argument('--data_idxfile_path', type=str, default='PFENet-Modified/data/splits/')
     parser.add_argument('--benchmark', type=str, default='pascal', choices=['pascal', 'coco', 'fss'])
     parser.add_argument('--logpath', type=str, default='')
     parser.add_argument('--bsz', type=int, default=20)
@@ -66,6 +68,8 @@ if __name__ == '__main__':
     parser.add_argument('--seed', type=int, default=233)
     parser.add_argument('--skipnovel', type=int, default=0)
     parser.add_argument('--stop_interval', type=int, default=10)
+    parser.add_argument('--start_tolerance', type=int, default=20)
+    parser.add_argument('--gpu_num', type=int, default=1)
     parser.add_argument('--optim', type=str, default='adam',choices=['adam', 'sgd','sgd-weight-decay','adam-weight-decay'])
     args = parser.parse_args()
     Logger.initialize(args, training=True)
@@ -85,7 +89,7 @@ if __name__ == '__main__':
     # Device setup
     #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     Logger.info('# available GPUs: %d' % torch.cuda.device_count())
-    model = nn.DataParallel(model.cuda(), device_ids=[0])
+    model = nn.DataParallel(model.cuda(), device_ids=list(range(args.gpu_num)))
     model.train()
 
     # Helper classes (for training) initialization
@@ -104,9 +108,9 @@ if __name__ == '__main__':
     Evaluator.initialize()
 
     # Dataset initialization
-    FSSDataset.initialize(img_size=473, datapath=args.datapath, use_original_imgsize=False)
-    dataloader_trn = FSSDataset.build_dataloader(args.benchmark, args.bsz, args.nworker, args.fold, 'trn',skip_novel=(args.skipnovel != 0))
-    dataloader_val = FSSDataset.build_dataloader(args.benchmark, args.bsz, args.nworker, args.fold, 'val')
+    FSSDataset.initialize(img_size=473, use_original_imgsize=False)
+    dataloader_trn = FSSDataset.build_dataloader(args.benchmark, args.bsz, args.nworker, args.fold, 'trn',skip_novel=(args.skipnovel != 0),args=args)
+    dataloader_val = FSSDataset.build_dataloader(args.benchmark, args.bsz, args.nworker, args.fold, 'val',args=args)
 
     # Train HSNet
     best_val_miou = float('-inf')
@@ -126,12 +130,12 @@ if __name__ == '__main__':
         Logger.tbd_writer.flush()
                 # Save the best model
         if val_miou > best_val_miou:
-            Logger.info(f'### New best !!!! prev best idx:{prev_best_epoch} @ miou:{best_val_miou}')
+            Logger.info(f'### New best !!!! prev best miou:{best_val_miou} @ idx:{prev_best_epoch}  ')
             Logger.save_model_miou(model, epoch, val_miou)
             prev_best_epoch=epoch
             best_val_miou = val_miou
         else:
-            if(epoch-prev_best_epoch>args.stop_interval):
+            if(epoch-prev_best_epoch>args.stop_interval) and epoch > args.strart_tolerance:
                 Logger.info(f'{args.stop_interval} epochs no best, stop train')
                 break
     Logger.tbd_writer.close()

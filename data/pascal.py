@@ -11,7 +11,7 @@ from common.logger import Logger
 
 
 class DatasetPASCAL(Dataset):
-    def __init__(self, datapath, fold, transform, split, shot, use_original_imgsize,skip_novel=False):
+    def __init__(self, data_img_path,data_ann_path,data_idxfile_path,fold, transform, split, shot, use_original_imgsize,skip_novel=False):
         self.split = 'val' if split in ['val', 'test'] else 'trn'
         self.fold = fold
         self.nfolds = 4
@@ -21,8 +21,10 @@ class DatasetPASCAL(Dataset):
         self.use_original_imgsize = use_original_imgsize
         self.skip_novel = skip_novel
 
-        self.img_path = os.path.join(datapath, 'VOC2012/JPEGImages/')
-        self.ann_path = os.path.join(datapath, 'VOC2012/SegmentationClassAug/')
+        self.img_path = data_img_path
+        self.ann_path = data_ann_path
+        self.idxfile_path = data_idxfile_path
+
         self.transform = transform
 
         self.class_ids = self.build_class_ids()
@@ -120,7 +122,7 @@ class DatasetPASCAL(Dataset):
     def build_img_metadata(self):
 
         def read_metadata(split, fold_id):
-            fold_n_metadata = os.path.join('/kaggle/working/PFENet-Modified/data/splits/pascal/%s/fold%d.txt' % (split, fold_id))
+            fold_n_metadata = os.path.join(self.idxfile_path,'/pascal/%s/fold%d.txt' % (split, fold_id))
             with open(fold_n_metadata, 'r') as f:
                 fold_n_metadata = f.read().split('\n')[:-1]
             fold_n_metadata = [[data.split('__')[0], int(data.split('__')[1]) - 1] for data in fold_n_metadata]
@@ -129,7 +131,7 @@ class DatasetPASCAL(Dataset):
         # 跳过含有新类的图片
         def read_metadata_skip_novel(split, fold_id):
             novelclass_list = list(range(1+self.fold*5,1+self.fold*5+5))
-            fold_n_metadata = os.path.join('/kaggle/working/PFENet-Modified/data/splits/pascal/%s/fold%d.txt' % (split, fold_id))
+            fold_n_metadata = os.path.join(self.idxfile_path,'/pascal/%s/fold%d.txt' % (split, fold_id))
             with open(fold_n_metadata, 'r') as f:
                 fold_n_metadata = f.read().split('\n')[:-1]
             fold_n_metadata = [[data.split('__')[0], int(data.split('__')[1]) - 1] for data in fold_n_metadata]
