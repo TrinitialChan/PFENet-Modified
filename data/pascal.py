@@ -25,6 +25,8 @@ class DatasetPASCAL(Dataset):
         self.ann_path = data_ann_path
         self.idxfile_path = data_idxfile_path
 
+        print(self.img_path+'\n'+self.ann_path+'\n'+self.idxfile_path)
+
         self.transform = transform
 
         self.class_ids = self.build_class_ids()

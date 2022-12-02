@@ -28,7 +28,7 @@ class FSSDataset:
                                             transforms.Normalize(cls.img_mean, cls.img_std)])
 
     @classmethod
-    def build_dataloader(cls, benchmark, bsz, nworker, fold, split, shot=1,skip_novel=False,args=None):
+    def build_dataloader(cls, benchmark, bsz, nworker, fold, split,args, shot=1,skip_novel=False):
         # Force randomness during training for diverse episode combinations
         # Freeze randomness during testing for reproducibility
         shuffle = split == 'trn'
